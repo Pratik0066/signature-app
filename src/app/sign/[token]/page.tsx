@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, use } from "react"
 import { supabase } from "@/lib/supabase/client"
 import type { Signer, SignatureField } from "@/types"
 interface DocData {
@@ -13,13 +13,14 @@ interface DocData {
   created_at: string
   updated_at: string
 }
+import PdfViewer from "@/components/pdf-viewer"
 import { PenTool, Loader2, CheckCircle, Pen, Type, Upload } from "lucide-react"
 import { toast } from "sonner"
 
 type SignMode = "draw" | "type" | "upload" | null
 
-export default function PublicSigningPage({ params }: { params: { token: string } }) {
-  const { token } = params
+export default function PublicSigningPage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = use(params)
   const [signer, setSigner] = useState<Signer | null>(null)
   const [docData, setDocData] = useState<DocData | null>(null)
   const [fields, setFields] = useState<SignatureField[]>([])
@@ -270,13 +271,8 @@ export default function PublicSigningPage({ params }: { params: { token: string 
 
       <div className="max-w-4xl mx-auto p-6 grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div className="aspect-[3/4] flex items-center justify-center text-zinc-400 p-8">
-              <div className="text-center">
-                <p className="text-lg font-medium text-zinc-600 mb-2">{docData.name}</p>
-                <p className="text-sm">PDF preview would render here</p>
-              </div>
-            </div>
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden p-4">
+            <PdfViewer fileUrl={docData.file_url} />
           </div>
         </div>
 

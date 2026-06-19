@@ -1,8 +1,24 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase/client"
 import { Search, Bell } from "lucide-react"
 
 export function Navbar() {
+  const [userName, setUserName] = useState("User")
+  const [userEmail, setUserEmail] = useState("")
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.user_metadata?.full_name) {
+        setUserName(user.user_metadata.full_name)
+      } else if (user?.email) {
+        setUserName(user.email.split("@")[0])
+      }
+      if (user?.email) setUserEmail(user.email)
+    })
+  }, [])
+
   return (
     <header className="sticky top-0 z-40 h-20 bg-[#050816]/80 backdrop-blur-xl border-b border-white/10">
       <div className="h-full flex items-center justify-between px-6">
@@ -22,11 +38,11 @@ export function Navbar() {
 
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-linear-to-br from-violet-500 to-purple-600 flex items-center justify-center text-sm font-medium">
-              U
+              {userName.charAt(0).toUpperCase()}
             </div>
             <div className="hidden md:block">
-              <p className="text-sm font-medium">User</p>
-              <p className="text-xs text-zinc-500">Free Plan</p>
+              <p className="text-sm font-medium">{userName}</p>
+              <p className="text-xs text-zinc-500">{userEmail || "Free Plan"}</p>
             </div>
           </div>
         </div>

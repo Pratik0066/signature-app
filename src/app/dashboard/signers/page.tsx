@@ -53,7 +53,7 @@ export default function SignersPage() {
         <p className="text-zinc-400 mt-1">Track all signers across your documents</p>
       </div>
 
-      <div className="bg-[#111827] rounded-2xl border border-white/10 overflow-hidden">
+      <div className="bg-card rounded-2xl border border-white/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

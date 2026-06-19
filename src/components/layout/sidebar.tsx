@@ -1,7 +1,9 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { supabase } from "@/lib/supabase/client"
 import {
   LayoutDashboard,
   FileText,
@@ -23,6 +25,17 @@ const items = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const [userName, setUserName] = useState("User")
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.user_metadata?.full_name) {
+        setUserName(user.user_metadata.full_name)
+      } else if (user?.email) {
+        setUserName(user.email.split("@")[0])
+      }
+    })
+  }, [])
 
   return (
     <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-72 bg-[#0B1020] border-r border-white/10 flex-col z-50">
@@ -62,10 +75,12 @@ export function Sidebar() {
 
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 px-4 py-3">
-          <div className="h-8 w-8 rounded-full bg-linear-to-br from-violet-500 to-purple-600" />
+          <div className="h-8 w-8 rounded-full bg-linear-to-br from-violet-500 to-purple-600 flex items-center justify-center text-xs font-medium">
+            {userName.charAt(0).toUpperCase()}
+          </div>
           <div>
-            <p className="text-sm font-medium">Free Plan</p>
-            <p className="text-xs text-zinc-500">Upgrade for more</p>
+            <p className="text-sm font-medium">{userName}</p>
+            <p className="text-xs text-zinc-500">Free Plan</p>
           </div>
         </div>
       </div>

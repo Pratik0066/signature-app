@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase/client"
 import { formatDate } from "@/lib/utils"
@@ -71,8 +71,23 @@ export default function DocumentsPage() {
     return result
   }, [documents, search, statusFilter, sortField, sortDir])
 
-  async function handleDelete(id: string, name: string) {
+  const handleDelete = useCallback(async (id: string, name: string) => {
     if (!confirm(`Delete "${name}"?`)) return
+
+    const { data: doc } = await supabase
+      .from("documents")
+      .select("file_path")
+      .eq("id", id)
+      .single()
+
+    if (doc?.file_path) {
+      await supabase.storage.from("documents").remove([doc.file_path])
+    }
+
+    await supabase.from("signature_fields").delete().eq("document_id", id)
+    await supabase.from("signers").delete().eq("document_id", id)
+    await supabase.from("signatures").delete().eq("document_id", id)
+    await supabase.from("audit_logs").delete().eq("document_id", id)
 
     const { error } = await supabase.from("documents").delete().eq("id", id)
     if (error) {
@@ -81,7 +96,7 @@ export default function DocumentsPage() {
     }
     setDocuments((prev) => prev.filter((d) => d.id !== id))
     toast.success("Document deleted")
-  }
+  }, [])
 
   function toggleSort(field: SortField) {
     if (sortField === field) {
